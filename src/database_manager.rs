@@ -100,7 +100,7 @@ impl DestinyDatabaseManager {
             });
 
         for weapon in valid_weapons {
-            let mut perks = weapon
+            let perks = weapon
                 .sockets
                 .as_ref()
                 .unwrap()
@@ -150,8 +150,6 @@ impl DestinyDatabaseManager {
             if perks.is_empty() {
                 continue;
             }
-
-            perks.reverse();
 
             Manager::insert(&mut tx, &weapon, &perks).await.unwrap();
         }

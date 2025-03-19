@@ -50,7 +50,7 @@ pub trait DestinyPerkManager<Db: Database> {
 
     async fn insert<'c>(
         tx: &mut Transaction<'c, Db>,
-        weapon: &DestinyInventoryItemDefinition,
+        perk: &DestinyInventoryItemDefinition,
     ) -> sqlx::Result<()>;
 
     async fn delete_all<'c, E>(tx: &mut Transaction<'c, Db>) -> sqlx::Result<()>;
