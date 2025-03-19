@@ -4,7 +4,7 @@ use futures::{StreamExt, stream};
 use google_sheets_api::types::sheet::RowData;
 use serde::{Deserialize, Serialize};
 use serenity::all::{AutocompleteChoice, CreateEmbed, CreateEmbedFooter};
-use sqlx::{Database, FromRow, Pool};
+use sqlx::{Database, Pool};
 
 use crate::{DestinyPerkManager, DestinyWeaponManager};
 
@@ -394,25 +394,6 @@ impl<'a> Deref for Perks<'a> {
     fn deref(&self) -> &Self::Target {
         &self.0
     }
-}
-
-#[allow(dead_code)]
-#[derive(FromRow)]
-struct DestinyWeapon {
-    id: i64,
-    icon: String,
-    name: String,
-    column_1: Vec<i64>,
-    column_2: Vec<i64>,
-    perk_1: Vec<i64>,
-    perk_2: Vec<i64>,
-}
-
-#[allow(dead_code)]
-#[derive(FromRow)]
-pub struct DestinyPerk {
-    pub id: i64,
-    pub name: String,
 }
 
 #[derive(Debug)]

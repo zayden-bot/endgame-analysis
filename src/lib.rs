@@ -56,6 +56,7 @@ pub trait DestinyPerkManager<Db: Database> {
     async fn delete_all<'c, E>(tx: &mut Transaction<'c, Db>) -> sqlx::Result<()>;
 }
 
+#[derive(FromRow)]
 pub struct DestinyPerk {
     pub id: i64,
     pub name: String,
