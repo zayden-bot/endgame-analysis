@@ -364,9 +364,9 @@ impl Perks<'_> {
     ) -> ApiPerks {
         async fn get_perk_ids<Db: Database, Manager: DestinyPerkManager<Db>>(
             pool: &Pool<Db>,
-            perks: &[&str],
+            perks: Vec<String>,
         ) -> Vec<u32> {
-            let perk_records = Manager::get_all(pool, perks).await.unwrap();
+            let perk_records = Manager::get_all(pool, &perks).await.unwrap();
 
             perk_records
                 .into_iter()
@@ -374,7 +374,12 @@ impl Perks<'_> {
                 .collect()
         }
 
-        let api_perks = stream::iter(&self.0)
+        let iter = self
+            .0
+            .iter()
+            .map(|p| p.iter().map(|s| s.to_string()).collect::<Vec<_>>());
+
+        let api_perks = stream::iter(iter)
             .then(|perks| get_perk_ids::<Db, Manager>(pool, perks))
             .collect::<Vec<_>>()
             .await;
