@@ -46,7 +46,7 @@ pub struct DestinyWeapon {
 pub trait DestinyPerkManager<Db: Database> {
     async fn get(pool: &Pool<Db>, name: &str) -> sqlx::Result<DestinyPerk>;
 
-    async fn get_all(pool: &Pool<Db>, names: &[&str]) -> sqlx::Result<Vec<DestinyPerk>>;
+    async fn get_all(pool: &Pool<Db>, names: &[String]) -> sqlx::Result<Vec<DestinyPerk>>;
 
     async fn insert<'c>(
         tx: &mut Transaction<'c, Db>,
