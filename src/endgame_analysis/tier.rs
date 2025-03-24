@@ -32,6 +32,7 @@ impl From<CellData> for Tier {
         let colour = value
             .effective_format
             .background_color_style
+            .unwrap()
             .rgb_color
             .unwrap();
 
