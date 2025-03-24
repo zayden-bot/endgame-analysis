@@ -8,7 +8,7 @@ use serenity::all::{
 use sqlx::{Database, Pool};
 use zayden_core::parse_options;
 
-use crate::{DestinyWeaponManager, Result};
+use crate::{DestinyWeaponManager, Error, Result};
 
 use super::endgame_analysis::EndgameAnalysisSheet;
 use super::endgame_analysis::weapon::Weapon;
@@ -43,7 +43,7 @@ impl WeaponCommand {
         let weapon = weapons
             .iter()
             .find(|w| w.name().to_lowercase() == name.to_lowercase())
-            .unwrap();
+            .ok_or_else(|| Error::weapon_not_found(name))?;
 
         interaction
             .edit_response(ctx, EditInteractionResponse::new().embed(weapon.into()))
