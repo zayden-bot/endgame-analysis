@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use bungie_api::DestinyInventoryItemDefinition;
-use sqlx::{Database, FromRow, Pool, Transaction};
+use sqlx::{Database, Executor, FromRow, Pool, Transaction};
 
 pub mod database_manager;
 pub mod dimwishlist;
@@ -22,13 +22,13 @@ pub trait DestinyWeaponManager<Db: Database> {
 
     async fn get_by_prefix(pool: &Pool<Db>, name: &str) -> sqlx::Result<Vec<DestinyWeapon>>;
 
-    async fn insert<'c>(
-        tx: Transaction<'c, Db>,
-        weapon: &DestinyInventoryItemDefinition,
-        perks: &[Vec<&DestinyInventoryItemDefinition>],
-    ) -> sqlx::Result<Transaction<'c, Db>>;
+    // async fn insert<'c>(
+    //     tx: Transaction<'c, Db>,
+    //     weapon: &DestinyInventoryItemDefinition,
+    //     perks: &[Vec<&DestinyInventoryItemDefinition>],
+    // ) -> sqlx::Result<Transaction<'c, Db>>;
 
-    async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
+    // async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
 }
 
 #[derive(FromRow)]
@@ -48,12 +48,12 @@ pub trait DestinyPerkManager<Db: Database> {
 
     async fn get_all(pool: &Pool<Db>, names: &[String]) -> sqlx::Result<Vec<DestinyPerk>>;
 
-    async fn insert<'c>(
-        tx: Transaction<'c, Db>,
-        perk: &DestinyInventoryItemDefinition,
-    ) -> sqlx::Result<Transaction<'c, Db>>;
+    // async fn insert<'c>(
+    //     tx: impl Executor<'c, Database = Db>,
+    //     perk: &DestinyInventoryItemDefinition,
+    // ) -> sqlx::Result<Transaction<'c, Db>>;
 
-    async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
+    // async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
 }
 
 #[derive(FromRow)]
