@@ -64,10 +64,10 @@ impl TierListCommand {
         let weapons = weapons
             .into_iter()
             .filter(|w| w.item_type() == weapon_type)
-            .filter(|w| tiers.contains(&w.tier))
+            .filter(|w| tiers.contains(&w.tier.tier))
             .take(count.unwrap_or(usize::MAX))
             .fold(init_map, |mut map, w| {
-                map.get_mut(&w.tier).unwrap().push(w.name);
+                map.get_mut(&w.tier.tier).unwrap().push(w.name);
                 map
             });
 

@@ -52,7 +52,7 @@ impl DimWishlistCommand {
         let weapons: Vec<Weapon> = serde_json::from_str(&weapons).unwrap();
 
         let wishlist = stream::iter(weapons)
-            .filter(|weapon| future::ready(tier.contains(&weapon.tier().as_str())))
+            .filter(|weapon| future::ready(tier.contains(&weapon.tier.tier().as_str())))
             .then(|weapon| {
                 let pool = pool.clone();
                 async move {

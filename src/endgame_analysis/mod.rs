@@ -13,7 +13,8 @@ pub mod weapon;
 
 pub use affinity::Affinity;
 pub use frame::Frame;
-pub use tier::{TIERS, Tier};
+pub use tier::Tier;
+pub use tier::{TIERS, TierLabel};
 pub use weapon::{Weapon, WeaponBuilder};
 
 use crate::{DestinyWeaponManager, Result};

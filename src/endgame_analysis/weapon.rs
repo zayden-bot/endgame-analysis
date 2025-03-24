@@ -1,7 +1,7 @@
 use std::{collections::HashMap, ops::Deref};
 
 use futures::{StreamExt, stream};
-use google_sheets_api::types::sheet::RowData;
+use google_sheets_api::types::sheet::{CellData, RowData};
 use serde::{Deserialize, Serialize};
 use serenity::all::{AutocompleteChoice, CreateEmbed, CreateEmbedFooter};
 use sqlx::{Database, Pool};
@@ -72,7 +72,7 @@ pub struct WeaponBuilder {
     pub column_2: String,
     pub origin_trait: String,
     pub rank: u8,
-    pub tier: String,
+    pub tier: Tier,
 }
 
 impl WeaponBuilder {
@@ -150,7 +150,7 @@ impl WeaponBuilder {
         self
     }
 
-    pub fn tier(mut self, tier: impl Into<String>) -> Self {
+    pub fn tier(mut self, tier: impl Into<Tier>) -> Self {
         self.tier = tier.into();
         self
     }
@@ -166,12 +166,12 @@ impl WeaponBuilder {
                         .as_deref()
                         .unwrap_or_default()
                         .to_lowercase(),
-                    r.formatted_value.unwrap_or_default(),
+                    r,
                 )
             })
-            .collect::<HashMap<String, String>>();
+            .collect::<HashMap<String, CellData>>();
 
-        let weapon_name = data.remove("name").unwrap();
+        let weapon_name = data.remove("name").unwrap().formatted_value.unwrap();
 
         if weapon_name == "Ideal" {
             return None;
@@ -179,23 +179,37 @@ impl WeaponBuilder {
 
         let reserves = data
             .remove("reserves")
+            .map(|r| r.formatted_value.unwrap())
             .filter(|s| s != "?")
             .map(|s| s.parse().unwrap());
         let shield = data
             .remove("shield")
+            .map(|r| r.formatted_value.unwrap())
             .filter(|s| s != "?")
             .map(|s| s.parse().unwrap());
 
         let weapon = Self::new(weapon_name, name)
-            .affinity(data.remove("affinity").unwrap())
-            .frame(data.remove("frame"))
-            .enhanceable(data.remove("enhance").unwrap() == "Yes")
+            .affinity(data.remove("affinity").unwrap().formatted_value.unwrap())
+            .frame(data.remove("frame").map(|f| f.formatted_value.unwrap()))
+            .enhanceable(data.remove("enhance").unwrap().formatted_value.unwrap() == "Yes")
             .shield(shield)
             .reserves(reserves)
-            .column_1(data.remove("column 1").unwrap())
-            .column_2(data.remove("column 2").unwrap())
-            .origin_trait(data.remove("origin trait").unwrap())
-            .rank(data.remove("rank").unwrap().parse().unwrap())
+            .column_1(data.remove("column 1").unwrap().formatted_value.unwrap())
+            .column_2(data.remove("column 2").unwrap().formatted_value.unwrap())
+            .origin_trait(
+                data.remove("origin trait")
+                    .unwrap()
+                    .formatted_value
+                    .unwrap(),
+            )
+            .rank(
+                data.remove("rank")
+                    .unwrap()
+                    .formatted_value
+                    .unwrap()
+                    .parse()
+                    .unwrap(),
+            )
             .tier(data.remove("tier").unwrap());
 
         Some(weapon)
@@ -219,7 +233,7 @@ impl WeaponBuilder {
             column_2: self.column_2,
             origin_trait: self.origin_trait,
             rank: self.rank,
-            tier: self.tier.parse().unwrap(),
+            tier: self.tier,
         }
     }
 }
@@ -254,10 +268,6 @@ impl Weapon {
         let column_2 = self.column_2.split('\n').collect::<Vec<_>>();
 
         Perks([column_1, column_2])
-    }
-
-    pub fn tier(&self) -> String {
-        self.tier.to_string()
     }
 
     pub async fn as_api<
@@ -312,20 +322,24 @@ impl Weapon {
 
 impl From<&Weapon> for CreateEmbed {
     fn from(value: &Weapon) -> Self {
-        let mut description = format!("Affinity: {}", value.affinity);
+        let mut description = format!(
+            "Tier: {} (#{})\nAffinity: {}",
+            value.tier.tier(),
+            value.rank,
+            value.affinity
+        );
         if let Some(frame) = &value.frame {
             description.push_str(&format!("\nFrame: {}", frame));
         }
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
-        description.push_str(&format!("\nTier: {} (#{})", value.tier, value.rank));
 
         let embed = CreateEmbed::new()
             .title(value.name.to_string())
             .thumbnail(format!("https://www.bungie.net{}", value.icon))
             .footer(CreateEmbedFooter::new("From 'Destiny 2: Endgame Analysis'"))
-            // .colour()
+            .colour(value.tier.colour)
             .description(description)
             .fields(
                 value
