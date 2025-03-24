@@ -23,12 +23,12 @@ pub trait DestinyWeaponManager<Db: Database> {
     async fn get_by_prefix(pool: &Pool<Db>, name: &str) -> sqlx::Result<Vec<DestinyWeapon>>;
 
     async fn insert<'c>(
-        tx: &mut Transaction<'c, Db>,
+        tx: Transaction<'c, Db>,
         weapon: &DestinyInventoryItemDefinition,
         perks: &[Vec<&DestinyInventoryItemDefinition>],
-    ) -> sqlx::Result<()>;
+    ) -> sqlx::Result<Transaction<'c, Db>>;
 
-    async fn delete_all<'c>(tx: &mut Transaction<'c, Db>) -> sqlx::Result<()>;
+    async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
 }
 
 #[derive(FromRow)]
@@ -49,11 +49,11 @@ pub trait DestinyPerkManager<Db: Database> {
     async fn get_all(pool: &Pool<Db>, names: &[String]) -> sqlx::Result<Vec<DestinyPerk>>;
 
     async fn insert<'c>(
-        tx: &mut Transaction<'c, Db>,
+        tx: Transaction<'c, Db>,
         perk: &DestinyInventoryItemDefinition,
-    ) -> sqlx::Result<()>;
+    ) -> sqlx::Result<Transaction<'c, Db>>;
 
-    async fn delete_all<'c, E>(tx: &mut Transaction<'c, Db>) -> sqlx::Result<()>;
+    async fn delete_all<'c>(tx: Transaction<'c, Db>) -> sqlx::Result<Transaction<'c, Db>>;
 }
 
 #[derive(FromRow)]

@@ -67,7 +67,7 @@ impl DestinyDatabaseManager {
     ) -> Result<()> {
         let mut tx = pool.begin().await.unwrap();
 
-        Manager::delete_all(&mut tx).await.unwrap();
+        tx = Manager::delete_all(tx).await.unwrap();
 
         let valid_weapons = item_manifest
             .values()
@@ -151,7 +151,7 @@ impl DestinyDatabaseManager {
                 continue;
             }
 
-            Manager::insert(&mut tx, &weapon, &perks).await.unwrap();
+            tx = Manager::insert(tx, &weapon, &perks).await.unwrap();
         }
 
         tx.commit().await.unwrap();
@@ -195,7 +195,7 @@ impl DestinyDatabaseManager {
         let mut tx = pool.begin().await.unwrap();
 
         for perk in valid_perks {
-            Manager::insert(&mut tx, perk).await.unwrap();
+            tx = Manager::insert(tx, perk).await.unwrap();
         }
 
         tx.commit().await.unwrap();
