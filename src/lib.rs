@@ -60,4 +60,5 @@ pub trait DestinyPerkManager<Db: Database> {
 pub struct DestinyPerk {
     pub id: i64,
     pub name: String,
+    pub description: String,
 }
