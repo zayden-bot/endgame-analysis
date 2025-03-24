@@ -198,6 +198,8 @@ impl DestinyDatabaseManager {
             tx = Manager::insert(tx, perk).await.unwrap();
         }
 
+        println!("tx: {:?}", tx);
+
         tx.commit().await.unwrap();
 
         Ok(())
