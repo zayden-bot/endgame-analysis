@@ -33,8 +33,7 @@ impl From<CellData> for Tier {
             .effective_format
             .background_color_style
             .unwrap()
-            .rgb_color
-            .unwrap();
+            .rgb_color;
 
         Self {
             tier,
