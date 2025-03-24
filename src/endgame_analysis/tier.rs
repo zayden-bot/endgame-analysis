@@ -31,6 +31,7 @@ impl From<CellData> for Tier {
         let tier = value.formatted_value.unwrap().parse().unwrap();
         let colour = value
             .effective_format
+            .unwrap()
             .background_color_style
             .unwrap()
             .rgb_color;
