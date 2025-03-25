@@ -2,7 +2,6 @@ use async_trait::async_trait;
 use bungie_api::DestinyInventoryItemDefinition;
 use sqlx::{AnyConnection, Database, FromRow, Pool};
 
-pub mod database_manager;
 pub mod dimwishlist;
 pub mod endgame_analysis;
 pub mod error;
