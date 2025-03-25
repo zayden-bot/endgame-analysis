@@ -8,7 +8,7 @@ use bungie_api::{
     BungieClientBuilder, DestinyInventoryItemDefinition, DestinyInventoryItemManifest,
     DestinyPlugSetManifest, DestinySocketCategoryManifest, DestinySocketTypeManifest,
 };
-use sqlx::{Database, Pool};
+use sqlx::{AnyPool, Database};
 
 use crate::{DestinyPerkManager, DestinyWeaponManager, Result};
 
@@ -20,7 +20,7 @@ impl DestinyDatabaseManager {
         WeaponManager: DestinyWeaponManager<Db>,
         PerkManager: DestinyPerkManager<Db>,
     >(
-        pool: &Pool<Db>,
+        pool: &AnyPool,
     ) -> Result<()> {
         let api_key = env::var("BUNGIE_API_KEY").unwrap();
 
@@ -59,7 +59,7 @@ impl DestinyDatabaseManager {
     }
 
     async fn update_weapon_db<Db: Database, Manager: DestinyWeaponManager<Db>>(
-        pool: &Pool<Db>,
+        pool: &AnyPool,
         item_manifest: &DestinyInventoryItemManifest,
         socket_type_manifest: &DestinySocketTypeManifest,
         socket_category_manifest: &DestinySocketCategoryManifest,
@@ -67,10 +67,7 @@ impl DestinyDatabaseManager {
     ) -> Result<()> {
         let mut tx = pool.begin().await.unwrap();
 
-        sqlx::query!("DELETE FROM destiny_weapons")
-            .execute(&mut *tx)
-            .await
-            .unwrap();
+        Manager::delete_all(&mut *tx).await.unwrap();
 
         let valid_weapons = item_manifest
             .values()
@@ -154,45 +151,7 @@ impl DestinyDatabaseManager {
                 continue;
             }
 
-            let hash = weapon.hash as i64;
-            let name = weapon.display_properties.name.as_str();
-            let icon = weapon.display_properties.icon.as_deref();
-
-            let empty = Vec::new();
-
-            let column_1 = perks.first().unwrap();
-            let column_2 = perks.get(1).unwrap();
-            let perk_1 = perks.get(2).unwrap();
-            let perk_2 = perks.get(3).unwrap_or(&empty);
-
-            sqlx::query!(
-                r#"
-            INSERT INTO destiny_weapons (id, name, icon, column_1, column_2, perk_1, perk_2)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            "#,
-                hash,
-                name,
-                icon,
-                &column_1
-                    .into_iter()
-                    .map(|p| p.hash as i64)
-                    .collect::<Vec<_>>(),
-                &column_2
-                    .into_iter()
-                    .map(|p| p.hash as i64)
-                    .collect::<Vec<_>>(),
-                &perk_1
-                    .into_iter()
-                    .map(|p| p.hash as i64)
-                    .collect::<Vec<_>>(),
-                &perk_2
-                    .into_iter()
-                    .map(|p| p.hash as i64)
-                    .collect::<Vec<_>>(),
-            )
-            .execute(&mut *tx)
-            .await
-            .unwrap();
+            Manager::insert(&mut *tx, &weapon, &perks);
         }
 
         tx.commit().await.unwrap();
@@ -201,15 +160,12 @@ impl DestinyDatabaseManager {
     }
 
     async fn update_perk_db<Db: Database, Manager: DestinyPerkManager<Db>>(
-        pool: &Pool<Db>,
+        pool: &AnyPool,
         item_manifest: &DestinyInventoryItemManifest,
     ) -> Result<()> {
         let mut tx = pool.begin().await.unwrap();
 
-        sqlx::query!("DELETE FROM destiny_perks")
-            .execute(&mut *tx)
-            .await
-            .unwrap();
+        Manager::delete_all(&mut *tx).await.unwrap();
 
         let valid_perks = item_manifest.values().filter(|item| match item {
             DestinyInventoryItemDefinition {
@@ -241,22 +197,7 @@ impl DestinyDatabaseManager {
         });
 
         for perk in valid_perks {
-            let hash = perk.hash as i64;
-            let name = &perk.display_properties.name;
-            let description = &perk.display_properties.description;
-
-            sqlx::query!(
-                r#"
-            INSERT INTO destiny_perks (id, name, description)
-            VALUES ($1, $2, $3)
-            "#,
-                hash,
-                name,
-                description
-            )
-            .execute(&mut *tx)
-            .await
-            .unwrap();
+            Manager::insert(&mut *tx, &perk);
         }
 
         tx.commit().await.unwrap();
