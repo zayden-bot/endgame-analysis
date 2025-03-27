@@ -339,7 +339,6 @@ impl From<&Weapon> for CreateEmbed {
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
-        description.push_str(&format!("\nOrigin Trait: {}", value.origin_trait()));
 
         let embed = CreateEmbed::new()
             .title(value.name.to_string())
@@ -363,7 +362,8 @@ impl From<&Weapon> for CreateEmbed {
                         )
                     })
                     .map(|(i, p)| (format!("Perk {}", i), p.join("\n"), true)),
-            );
+            )
+            .field("Origin Trait", value.origin_trait(), false);
 
         embed
     }
