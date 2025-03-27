@@ -336,11 +336,11 @@ impl From<&Weapon> for CreateEmbed {
         let frame = value
             .frame
             .as_ref()
-            .map(|f| f.to_string())
+            .map(|f| format!("{} ", f))
             .unwrap_or_default();
 
         let mut description = format!(
-            "-# {} {} {}\nTier: {} (#{})",
+            "*{}{} {}*\nTier: {} (#{})",
             value.affinity,
             frame,
             value.item_type(),
