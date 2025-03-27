@@ -3,7 +3,7 @@ use std::{collections::HashMap, ops::Deref};
 use futures::{StreamExt, stream};
 use google_sheets_api::types::sheet::{CellData, RowData};
 use serde::{Deserialize, Serialize};
-use serenity::all::{AutocompleteChoice, CreateEmbed, CreateEmbedFooter};
+use serenity::all::{AutocompleteChoice, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter};
 use sqlx::{Database, Pool};
 
 use crate::{DestinyPerkManager, DestinyWeaponManager};
@@ -339,19 +339,18 @@ impl From<&Weapon> for CreateEmbed {
             .map(|f| format!("{} ", f))
             .unwrap_or_default();
 
-        let mut description = format!(
-            "*{} {}{}*\nTier: {} (#{})",
-            value.affinity,
-            frame,
-            value.item_type(),
-            value.tier.tier(),
-            value.rank
-        );
+        let mut description = format!("**Tier: {} (#{})", value.tier.tier(), value.rank);
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
 
         let embed = CreateEmbed::new()
+            .author(CreateEmbedAuthor::new(format!(
+                "{} {}{}",
+                value.affinity,
+                frame,
+                value.item_type(),
+            )))
             .title(value.name.to_string())
             .thumbnail(format!("https://www.bungie.net{}", value.icon))
             .footer(CreateEmbedFooter::new("From 'Destiny 2: Endgame Analysis'"))
