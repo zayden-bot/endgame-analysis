@@ -270,6 +270,10 @@ impl Weapon {
         Perks([column_1, column_2])
     }
 
+    pub fn origin_trait(&self) -> &str {
+        &self.origin_trait
+    }
+
     pub async fn as_api<
         Db: Database,
         WeaponManager: DestinyWeaponManager<Db>,
@@ -323,9 +327,10 @@ impl Weapon {
 impl From<&Weapon> for CreateEmbed {
     fn from(value: &Weapon) -> Self {
         let mut description = format!(
-            "Tier: {} (#{})\nAffinity: {}",
+            "Tier: {} (#{})\nType: {}\nAffinity: {}",
             value.tier.tier(),
             value.rank,
+            value.item_type(),
             value.affinity
         );
         if let Some(frame) = &value.frame {
@@ -334,6 +339,7 @@ impl From<&Weapon> for CreateEmbed {
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
+        description.push_str(&format!("\nOrigin Trait: {}", value.origin_trait()));
 
         let embed = CreateEmbed::new()
             .title(value.name.to_string())
