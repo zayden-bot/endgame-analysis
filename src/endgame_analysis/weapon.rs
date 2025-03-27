@@ -333,7 +333,7 @@ impl From<&Weapon> for CreateEmbed {
             .unwrap_or_default();
 
         let mut description = format!(
-            "{} {} {}\n\nTier: {} (#{})",
+            "{} {} {}\nTier: {} (#{})",
             value.affinity,
             frame,
             value.item_type(),
