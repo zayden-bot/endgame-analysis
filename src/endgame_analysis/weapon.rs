@@ -339,7 +339,7 @@ impl From<&Weapon> for CreateEmbed {
             .map(|f| format!("{} ", f))
             .unwrap_or_default();
 
-        let mut description = format!("**Tier: {} (#{})", value.tier.tier(), value.rank);
+        let mut description = format!("Tier: {} (#{})", value.tier.tier(), value.rank);
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
