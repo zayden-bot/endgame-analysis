@@ -155,7 +155,7 @@ impl WeaponBuilder {
         self
     }
 
-    pub fn from_row_data(name: impl Into<String>, header: &RowData, row: RowData) -> Option<Self> {
+    pub fn from_row_data(name: &str, header: &RowData, row: RowData) -> Option<Self> {
         let mut data = header
             .values
             .iter()
@@ -187,20 +187,17 @@ impl WeaponBuilder {
             .map(|r| r.formatted_value.unwrap())
             .filter(|s| s != "?")
             .map(|s| s.parse().unwrap());
-        let frame = data
-            .remove("frame")
-            .map(|f| f.formatted_value.unwrap())
-            .map(|s| match s.as_str() {
-                "BGLs" | "HGLs" => String::from("Grenade Launcher"),
-                "LMGs" => String::from("Machine Gun"),
-                "LFRs" => String::from("Linear Fusion"),
-                "HCs" => String::from("Hand Cannon"),
-                s => String::from(&s[..s.len() - 1]),
-            });
+        let item_type = match name {
+            "BGLs" | "HGLs" => String::from("Grenade Launcher"),
+            "LMGs" => String::from("Machine Gun"),
+            "LFRs" => String::from("Linear Fusion"),
+            "HCs" => String::from("Hand Cannon"),
+            s => String::from(&s[..s.len() - 1]),
+        };
 
-        let weapon = Self::new(weapon_name, name)
+        let weapon = Self::new(weapon_name, item_type)
             .affinity(data.remove("affinity").unwrap().formatted_value.unwrap())
-            .frame(frame)
+            .frame(data.remove("frame").map(|f| f.formatted_value.unwrap()))
             .enhanceable(data.remove("enhance").unwrap().formatted_value.unwrap() == "Yes")
             .shield(shield)
             .reserves(reserves)

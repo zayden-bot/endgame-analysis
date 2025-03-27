@@ -79,7 +79,7 @@ impl EndgameAnalysisSheet {
 
         let mut iter = data.row_data.into_iter().skip(1);
         let header = iter.next().unwrap();
-        let iter = iter.filter_map(|r| WeaponBuilder::from_row_data(name.clone(), &header, r));
+        let iter = iter.filter_map(|r| WeaponBuilder::from_row_data(&name, &header, r));
 
         stream::iter(iter)
             .then(|builder| async { builder.build::<Db, Manager>(pool).await })
