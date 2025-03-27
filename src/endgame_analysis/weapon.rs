@@ -187,10 +187,20 @@ impl WeaponBuilder {
             .map(|r| r.formatted_value.unwrap())
             .filter(|s| s != "?")
             .map(|s| s.parse().unwrap());
+        let frame = data
+            .remove("frame")
+            .map(|f| f.formatted_value.unwrap())
+            .map(|s| match s.as_str() {
+                "BGLs" | "HGLs" => String::from("Grenade Launcher"),
+                "LMGs" => String::from("Machine Gun"),
+                "LFRs" => String::from("Linear Fusion"),
+                "HCs" => String::from("Hand Cannon"),
+                s => String::from(&s[..s.len() - 1]),
+            });
 
         let weapon = Self::new(weapon_name, name)
             .affinity(data.remove("affinity").unwrap().formatted_value.unwrap())
-            .frame(data.remove("frame").map(|f| f.formatted_value.unwrap()))
+            .frame(frame)
             .enhanceable(data.remove("enhance").unwrap().formatted_value.unwrap() == "Yes")
             .shield(shield)
             .reserves(reserves)
