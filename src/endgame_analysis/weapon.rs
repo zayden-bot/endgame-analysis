@@ -326,16 +326,20 @@ impl Weapon {
 
 impl From<&Weapon> for CreateEmbed {
     fn from(value: &Weapon) -> Self {
+        let frame = value
+            .frame
+            .as_ref()
+            .map(|f| f.to_string())
+            .unwrap_or_default();
+
         let mut description = format!(
-            "Tier: {} (#{})\nType: {}\nAffinity: {}",
-            value.tier.tier(),
-            value.rank,
+            "{} {} {}\n\nTier: {} (#{})",
+            value.affinity,
+            frame,
             value.item_type(),
-            value.affinity
+            value.tier.tier(),
+            value.rank
         );
-        if let Some(frame) = &value.frame {
-            description.push_str(&format!("\nFrame: {}", frame));
-        }
         if let Some(reserves) = value.reserves {
             description.push_str(&format!("\nReserves: {}", reserves));
         }
