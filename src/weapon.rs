@@ -42,8 +42,8 @@ impl WeaponCommand {
 
         let weapon = weapons
             .iter()
-            .find(|w| w.name().to_lowercase() == name.to_lowercase())
-            .ok_or_else(|| Error::weapon_not_found(name))?;
+            .find(|&w| w.name().to_lowercase() == name.to_lowercase())
+            .ok_or_else(|| Error::WeaponNotFound(name.to_string()))?;
 
         interaction
             .edit_response(ctx, EditInteractionResponse::new().embed(weapon.into()))
