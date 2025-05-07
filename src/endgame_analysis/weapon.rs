@@ -92,7 +92,8 @@ impl WeaponBuilder {
             "Elsie's Rifle" => String::from("Elsie's Rifle (Brave)"),
             "Jararaca-3SR" => String::from("Jararaca-3sr"),
             "Redback-5SI" => String::from("Redback-5si"),
-            _ => name
+            "Judgement" => String::from("Judgment"),
+            name => name
                 .trim()
                 .replace("\nBRAVE version", " (Brave)")
                 .replace(" (BRAVE version)", " (Brave)"),
