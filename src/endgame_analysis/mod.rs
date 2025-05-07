@@ -1,6 +1,6 @@
 use std::env;
 
-use futures::{StreamExt, stream};
+use futures::{StreamExt, future, stream};
 use google_sheets_api::SheetsClientBuilder;
 use google_sheets_api::types::common::Color;
 use google_sheets_api::types::sheet::GridData;
@@ -82,7 +82,18 @@ impl EndgameAnalysisSheet {
         let iter = iter.filter_map(|r| WeaponBuilder::from_row_data(&name, &header, r));
 
         stream::iter(iter)
-            .then(|builder| async { builder.build::<Db, Manager>(pool).await })
+            .then(|builder| async {
+                let name = builder.name.clone();
+
+                match builder.build::<Db, Manager>(pool).await {
+                    Ok(weapon) => Some(weapon),
+                    Err(_) => {
+                        eprintln!("Missing weapon {}", name);
+                        None
+                    }
+                }
+            })
+            .filter_map(future::ready)
             .collect()
             .await
     }
