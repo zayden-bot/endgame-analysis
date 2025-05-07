@@ -225,10 +225,10 @@ impl WeaponBuilder {
     pub async fn build<Db: Database, Manager: DestinyWeaponManager<Db>>(
         self,
         pool: &Pool<Db>,
-    ) -> Weapon {
-        let icon = Manager::get(pool, &self.name).await.unwrap().icon;
+    ) -> sqlx::Result<Weapon> {
+        let icon = Manager::get(pool, &self.name).await?.icon;
 
-        Weapon {
+        let weapon = Weapon {
             icon,
             name: self.name,
             item_type: self.item_type,
@@ -241,7 +241,9 @@ impl WeaponBuilder {
             origin_trait: self.origin_trait,
             rank: self.rank,
             tier: self.tier,
-        }
+        };
+
+        Ok(weapon)
     }
 }
 
