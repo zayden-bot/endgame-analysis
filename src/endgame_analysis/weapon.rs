@@ -62,7 +62,7 @@ use super::{Affinity, Frame, Tier};
 #[derive(Default)]
 pub struct WeaponBuilder {
     pub name: String,
-    pub item_type: String,
+    pub archetype: String,
     pub affinity: String,
     pub frame: Option<String>,
     pub enhanceable: bool,
@@ -76,7 +76,7 @@ pub struct WeaponBuilder {
 }
 
 impl WeaponBuilder {
-    pub fn new(name: impl Into<String>, item_type: impl Into<String>) -> Self {
+    pub fn new(name: impl Into<String>, archetype: impl Into<String>) -> Self {
         let name = name.into();
 
         let name = match name.as_str() {
@@ -101,7 +101,7 @@ impl WeaponBuilder {
 
         WeaponBuilder {
             name,
-            item_type: item_type.into(),
+            archetype: archetype.into(),
             ..Default::default()
         }
     }
@@ -188,7 +188,7 @@ impl WeaponBuilder {
             .map(|r| r.formatted_value.unwrap())
             .filter(|s| s != "?")
             .map(|s| s.parse().unwrap());
-        let item_type = match name {
+        let archetype = match name {
             "BGLs" | "HGLs" => String::from("Grenade Launcher"),
             "LMGs" => String::from("Machine Gun"),
             "LFRs" => String::from("Linear Fusion"),
@@ -196,7 +196,7 @@ impl WeaponBuilder {
             s => String::from(&s[..s.len() - 1]),
         };
 
-        let weapon = Self::new(weapon_name, item_type)
+        let weapon = Self::new(weapon_name, archetype)
             .affinity(data.remove("affinity").unwrap().formatted_value.unwrap())
             .frame(data.remove("frame").map(|f| f.formatted_value.unwrap()))
             .enhanceable(data.remove("enhance").unwrap().formatted_value.unwrap() == "Yes")
@@ -232,7 +232,7 @@ impl WeaponBuilder {
         let weapon = Weapon {
             icon,
             name: self.name,
-            item_type: self.item_type,
+            archetype: self.archetype,
             affinity: self.affinity.parse().unwrap(),
             frame: self.frame.map(|f| f.parse().unwrap()),
             enhanceable: self.enhanceable,
@@ -252,7 +252,7 @@ impl WeaponBuilder {
 pub struct Weapon {
     pub icon: String,
     pub name: String,
-    pub item_type: String,
+    pub archetype: String,
     pub affinity: Affinity,
     pub frame: Option<Frame>,
     pub enhanceable: bool,
@@ -269,8 +269,8 @@ impl Weapon {
         &self.name
     }
 
-    pub fn item_type(&self) -> &str {
-        &self.item_type
+    pub fn archetype(&self) -> &str {
+        &self.archetype
     }
 
     pub fn perks(&self) -> Perks {
@@ -352,7 +352,7 @@ impl From<&Weapon> for CreateEmbed {
                 "{} {}{}",
                 value.affinity,
                 frame,
-                value.item_type(),
+                value.archetype(),
             )))
             .title(value.name.to_string())
             .thumbnail(format!("https://www.bungie.net{}", value.icon))

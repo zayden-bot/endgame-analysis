@@ -26,11 +26,10 @@ impl TierListCommand {
     ) -> Result<()> {
         interaction.defer(ctx).await.unwrap();
 
-        let options = parse_options(options);
+        let mut options = parse_options(options);
 
-        let weapon_type = match options.get("type") {
-            Some(ResolvedValue::String(weapon_type)) => *weapon_type,
-            _ => unreachable!("Type is required"),
+        let Some(ResolvedValue::String(archetype)) = options.remove("archetype") else {
+            unreachable!("Archetype is required");
         };
 
         let count = options.get("count").map(|c| match c {
@@ -63,7 +62,7 @@ impl TierListCommand {
 
         let weapons = weapons
             .into_iter()
-            .filter(|w| w.item_type() == weapon_type)
+            .filter(|w| w.archetype() == archetype)
             .filter(|w| tiers.contains(&w.tier.tier))
             .take(count.unwrap_or(usize::MAX))
             .fold(init_map, |mut map, w| {
@@ -72,7 +71,7 @@ impl TierListCommand {
             });
 
         let embed = CreateEmbed::new()
-            .title(format!("Tier List for {}", weapon_type))
+            .title(format!("Tier List for {}", archetype))
             .footer(CreateEmbedFooter::new("From 'Destiny 2: Endgame Analysis'"))
             .fields(TIERS.iter().filter_map(|t| {
                 let weapons = weapons.get(t)?;
@@ -113,8 +112,8 @@ impl TierListCommand {
             .add_option(
                 CreateCommandOption::new(
                     CommandOptionType::String,
-                    "type",
-                    "The type of weapon to display",
+                    "archetype",
+                    "The archetype of weapon to display",
                 )
                 .required(true)
                 .set_autocomplete(true),
@@ -143,9 +142,9 @@ impl TierListCommand {
         };
 
         let choices = match option.name {
-            "type" => weapons
+            "archetype" => weapons
                 .iter()
-                .map(|w| w.item_type())
+                .map(|w| w.archetype())
                 .collect::<HashSet<_>>()
                 .into_iter()
                 .filter(|t| t.to_lowercase().contains(&option.value.to_lowercase()))
